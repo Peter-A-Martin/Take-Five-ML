@@ -11,6 +11,8 @@
 import numpy as np
 import random as rn
 import time
+import MLModel as mlm
+import math
 
 # Generating deck of cards
 deck = np.zeros((104, 2))
@@ -52,10 +54,19 @@ class Game:
         for player in self.players:
             player.score = 0
 
+    def generate_gamestate(self):
+        gamestate = np.zeros(12)
+        for i in range(4):
+            gamestate[i] = self.mainTable.tableSpace[i, :].max()
+            gamestate[i + 4] = np.count_nonzero(self.mainTable.tableSpace[i, :])
+            gamestate[i + 8] = self.mainTable.row_total(i)
+        return gamestate
+
     def play_round(self, printing):
         scores = np.zeros(len(self.players))
         for i in range(10):
-            self.play_hand()
+            gamestate = self.generate_gamestate()
+            self.play_hand(gamestate)
             if printing:
                 self.print_gamestate()
         for i in range(len(self.players)):
@@ -65,10 +76,10 @@ class Game:
         else:
             return 0
 
-    def play_hand(self):
+    def play_hand(self, gamestate):
         playedCards = np.zeros((len(self.players), 2))
         for i in range(len(playedCards)):
-            playedCards[i, :] = [self.players[i].choose_card(), i]
+            playedCards[i, :] = [self.players[i].choose_card(gamestate), i]
         playedCards = playedCards[playedCards[:, 0].argsort()]
         for i in range(len(playedCards[:, 0])):
             self.players[int(playedCards[i, 1])].score += self.mainTable.add_card(playedCards[i, 0])
@@ -140,30 +151,38 @@ class Hand:
     def __init__(self, parent):
         self.handSpace = np.zeros(10)
         self.score = 0
+        self.actor = -1
 
-    def choose_card(self):
-        chosenCard = self.handSpace[9]
-        self.handSpace[9] = 0
-        self.handSpace.sort()
+    def choose_card(self, decisionSpace):
+        if type(self.actor) is mlm.Actor:
+            ranking = self.actor.get_output(decisionSpace)
+            while (ranking.argmax() + 1) not in self.handSpace:
+                ranking[ranking.argmax()] = 0
+            self.handSpace[np.where(self.handSpace == (ranking.argmax() + 1))] = 0
+            chosenCard = ranking.argmax()
+        else:
+            self.handSpace.sort()
+            chosenCard = self.handSpace[9]
+            self.handSpace[9] = 0
         return chosenCard
 
     def print_hand(self):
         print(self.handSpace, " Score: ", self.score)
 
 
-newGame = Game(4, deck)
-start = time.time()
-hands = 0
-for i in range(1000):
-    scores = 0
-    newGame.clear_scores()
-    while type(scores) is int:
-        newGame.deal()
-        scores = newGame.play_round(False)
-        hands += 1
-end = time.time()
-print(end - start)
-print(hands)
+# newGame = Game(4, deck)
+# start = time.time()
+# hands = 0
+# for i in range(1000):
+#     scores = 0
+#     newGame.clear_scores()
+#     while type(scores) is int:
+#         newGame.deal()
+#         scores = newGame.play_round(False)
+#         hands += 1
+# end = time.time()
+# print(end - start)
+# print(hands)
 
 
 
