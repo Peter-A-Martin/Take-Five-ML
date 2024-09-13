@@ -31,3 +31,14 @@ At the end of a the round, players score points for all of their collected cards
 
 ## Setup:
 
+TakeFive.py is a simple library written to allow for the play of take five. A variable number of players can play, and a number of strategies can be used by each player, include the "naive" strategies (described shortly) and ML strategies.
+
+For learning, games are initially played with 4 players. In the future I hope to examine 5 player games, as well as train models to be successful at a range of player counts. A single neuralnetwork (Net) competes against three "naive" players over many games. The total score across these games is used as a measure of fitness for evolution, with the highest scoring Nets being culled, and the lowest scoring Nets reproducing. This continues for a number of generations.
+
+The naive strategies are as follows:
+
+Random Card: This is most similar to how the Nets behave pre training. A random card is selcted each round.
+
+High Card: The highest card is played from hand each round. This is the most successful naive strategy, consistently outpreforming random card and low card. Nets trained against three high card players begin to win consistently around generation 200.
+
+Low Card: The lowest card is played from hand each round. This may be the worst naive strategy, and is likely close to the worst strategy possible. It is defined only to have the Nets train against a variety of opponents.
