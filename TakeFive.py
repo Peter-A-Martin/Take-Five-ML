@@ -157,7 +157,7 @@ class Hand:
         if type(self.actor) is mlm.Actor:
             ranking = self.actor.get_output(decisionSpace)
             while (ranking.argmax() + 1) not in self.handSpace:
-                ranking[ranking.argmax()] = 0
+                ranking[ranking.argmax()] = -1
             self.handSpace[np.where(self.handSpace == (ranking.argmax() + 1))] = 0
             chosenCard = ranking.argmax()
         else:
