@@ -33,11 +33,17 @@ class Actor:
     # Defines the activation function used throughout the model
     # Here the sigmoid function is being used
     def activation(self, value):
+        # if value < 0:
+        #     return 0
+        # else:
+        #     return value
         return 1 / (1 + math.exp(-value))
 
     # Going from input to output is repeated matrix multiplication
     # The nodes are subject to the activation function after each step
     def get_output(self, eye):
+        for i in range(len(eye)):
+            eye[i] = self.activation(eye[i])
         self.layerOne = np.matmul(self.inputWeights, eye)
         for i in range(len(self.layerOne)):
             self.layerOne[i] = self.activation(self.layerOne[i])
@@ -48,6 +54,40 @@ class Actor:
         for i in range(len(self.output)):
             self.output[i] = self.activation(self.output[i])
         return self.output
+
+    def spit_model(self):
+        model = []
+        model.append(len(self.inputWeights[0, :]))
+        model.append(len(self.inputWeights[:, 0]))
+        model.append(len(self.twoWeights[0, :]))
+        model.append(len(self.twoWeights[:, 0]))
+        for row in self.inputWeights:
+            for weight in row:
+                model.append(weight)
+        for row in self.oneWeights:
+            for weight in row:
+                model.append(weight)
+        for row in self.twoWeights:
+            for weight in row:
+                model.append(weight)
+        return model
+
+    def eat_model(self, model):
+        self.inputWeights = np.zeros((int(model[1]), int(model[0])))
+        self.layerOne = []
+        self.oneWeights = np.zeros((int(model[2]), int(model[1])))
+        self.layerTwo = []
+        self.twoWeights = np.zeros((int(model[3]), int(model[2])))
+        self.output = []
+        for i in range(int(model[1])):
+            for j in range(int(model[0])):
+                self.inputWeights[i][j] = float(model[j + 4 + int(model[0]) * i])
+        for i in range(int(model[2])):
+            for j in range(int(model[1])):
+                self.oneWeights[i][j] = float(model[j + 4 + int(model[1]) * i + int(model[1]) * int(model[0])])
+        for i in range(int(model[3])):
+            for j in range(int(model[2])):
+                self.twoWeights[i][j] = float(model[j + 4 + int(model[2]) * i + int(model[1]) * int(model[0]) + int(model[2]) * int(model[1])])
 
 
 # testMat = np.zeros((3, 5))

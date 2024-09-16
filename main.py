@@ -4,6 +4,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import math
+import csv
 
 # Generating deck of cards
 deck = np.zeros((104, 2))
@@ -23,7 +24,7 @@ for i in range(104):
         deck[i, 1] = 7
 
 newGame = tf.Game(4, deck)
-dim = mlm.ActorDimensions(12, 15, 15, 104)
+dim = mlm.ActorDimensions(12, 10, 10, 104)
 maxChange = math.sqrt(math.sqrt(1260) * 2)
 protoActor = mlm.Actor(dim.dimensions)
 creche = [mlm.Actor(dim.dimensions) for i in range(25)]
@@ -32,7 +33,7 @@ for actor in creche:
 totalScores = [0, 0, 0, 0]
 start = time.time()
 scoreTracker = []
-for k in range(3000):
+for k in range(500):
     dummyScores = [0, 0, 0]
     for i in range(25):
         newGame.players[0].actor = creche[i]
@@ -61,7 +62,15 @@ for k in range(3000):
     print("Dummy Score: ", (sum(dummyScores) / (75 * 20)))
     scoreTracker.append(avgScore/(25 * 20))
 
+
 end = time.time()
 print(end - start)
+
+
+with open('test_cohort.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    for actor in creche:
+        writer.writerow(actor.spit_model())
+
 plt.plot(scoreTracker)
 plt.show()
